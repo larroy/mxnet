@@ -114,7 +114,7 @@ class KVStore {
   /*!
    * \brief push a list of key-value pairs into the store
    *
-   * If a key appears mulitple times in \a keys, then the according values will
+   * If a key appears multiple times in \a keys, then the respective values will
    * be aggregated (summed) before pushing.
    *
    * The (aggregated) values are merged into the store one by one
@@ -167,7 +167,7 @@ class KVStore {
    *
    * This function returns after adding a pull operator to the engine. Any
    * following operator requiring reading value will be blocked until the
-   * actual pull is finished. One can wait the pull is finished by
+   * actual pull is finished. One can wait until the pull is finished with the following:
    *
    * - when type == "local"
    * \code
@@ -226,10 +226,12 @@ class KVStore {
    * \brief the prototype of user-defined updater
    */
   typedef std::function<void(int, const NDArray&, NDArray*)> Updater;
+
   /**
    * \brief the prototype of user-defined updater with string keys
    */
   typedef std::function<void(const std::string&, const NDArray&, NDArray*)> StrUpdater;
+
   /*!
    * \brief set an updater
    *
@@ -263,7 +265,7 @@ class KVStore {
    ******************************************************/
 
   /**
-   * \brief initalize ps-lite environment variables
+   * \brief initialize ps-lite environment variables
    * \param envs key-value environment variables
    */
   static void InitPSEnv(const std::unordered_map<std::string, std::string>& envs) {
