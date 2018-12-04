@@ -33,6 +33,7 @@ import time
 import sys
 import multiprocessing
 import shlex
+import contextlib
 
 ###################################################
 #
@@ -108,6 +109,14 @@ def retry(target_exception, tries=4, delay_s=1, backoff=2):
     return decorated_retry
 
 
+@contextlib.contextmanager
+def remember_cwd():
+    '''
+    Restore current directory when exiting context
+    '''
+    curdir = os.getcwd()
+    try: yield
+    finally: os.chdir(curdir)
 
 
 class VMError(RuntimeError):
@@ -222,14 +231,17 @@ def qemu_rsync_to_host(ssh_port, remote_path, local_path):
 def qemu_provision(ssh_port=QEMU_SSH_PORT):
     import glob
     logging.info("Provisioning the VM with artifacts and sources")
+    with remember_cwd():
+        os.chdir('/work/mxnet')
+        artifact = glob.glob('build/*.whl')
+        artifact.append('build/tests/mxnet_unit_tests')
+        for x in artifact:
+            qemu_rsync(ssh_port, x, 'mxnet_dist/')
 
-    artifact = glob.glob('/work/mxnet/build/*.whl')
-    for x in artifact:
-        qemu_rsync(ssh_port, x, 'mxnet_dist/')
-    qemu_rsync(ssh_port, '/work/runtime_functions.py','')
-    qemu_rsync(ssh_port, '/work/vmcontrol.py','')
-    qemu_rsync(ssh_port, 'mxnet/tests', 'mxnet')
-    logging.info("Provisioning completed successfully.")
+        qemu_rsync(ssh_port, '/work/runtime_functions.py','')
+        qemu_rsync(ssh_port, '/work/vmcontrol.py','')
+        qemu_rsync(ssh_port, 'tests', 'mxnet')
+        logging.info("Provisioning completed successfully.")
 
 
 def wait_ssh_open(server, port, keep_waiting=None, timeout=None):
