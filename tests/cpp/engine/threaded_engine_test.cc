@@ -54,7 +54,7 @@ static uint32_t seed_ = 0xdeadbeef;
 /**
  * generate a list of workloads
  */
-void GenerateWorkload(int num_workloads, int num_var,
+void GenerateWorkload(size_t num_workloads, size_t num_var,
                       int min_read, int max_read,
                       int min_time, int max_time,
                       std::vector<Workload>* workloads) {
@@ -140,8 +140,8 @@ TEST(Engine, start_stop) {
 
 TEST(Engine, RandSumExpr) {
   std::vector<Workload> workloads;
-  int num_repeat = 5;
-  const int num_engine = 4;
+  const size_t num_repeat = 5;
+  const size_t num_engine = 4;
 
   std::vector<double> t(num_engine, 0.0);
   std::vector<mxnet::Engine*> engine(num_engine);
@@ -151,17 +151,17 @@ TEST(Engine, RandSumExpr) {
   engine[2] = mxnet::engine::CreateThreadedEnginePooled();
   engine[3] = mxnet::engine::CreateThreadedEnginePerDevice();
 
-  for (int repeat = 0; repeat < num_repeat; ++repeat) {
+  for (size_t repeat = 0; repeat < num_repeat; ++repeat) {
     srand(time(NULL) + repeat);
     int num_var = 100;
-    GenerateWorkload(10000, num_var, 2, 20, 1, 10, &workloads);
+    GenerateWorkload(1000, num_var, 2, 20, 1, 10, &workloads);
     std::vector<std::vector<double>> data(num_engine);
-    for (int i = 0; i < num_engine; ++i) {
+    for (size_t i = 0; i < num_engine; ++i) {
       data[i].resize(num_var, 1.0);
       t[i] += EvaluateWorloads(workloads, engine[i], &data[i]);
     }
 
-    for (int i = 1; i < num_engine; ++i) {
+    for (size_t i = 1; i < num_engine; ++i) {
       for (int j = 0; j < num_var; ++j) EXPECT_EQ(data[0][j], data[i][j]);
     }
     LOG(INFO) << "data: " << data[0][1] << " " << data[0][2] << "...";
