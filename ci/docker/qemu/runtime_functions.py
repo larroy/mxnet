@@ -65,8 +65,10 @@ def run_ut_py3_qemu():
     with VM() as vm:
         qemu_provision(vm.ssh_port)
         logging.info("execute tests")
-        qemu_ssh(vm.ssh_port, "./runtime_functions.py", "run_ut_python3_qemu_internal")
-        qemu_rsync_to_host(vm.ssh_port, "*.xml", "mxnet")
+        try:
+            qemu_ssh(vm.ssh_port, "./runtime_functions.py", "run_ut_python3_qemu_internal")
+        finally:
+            qemu_rsync_to_host(vm.ssh_port, "*.xml", "mxnet")
         logging.info("copied to host")
         logging.info("tests finished, vm shutdown.")
         vm.shutdown()
