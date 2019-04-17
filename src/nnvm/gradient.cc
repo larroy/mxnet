@@ -124,17 +124,18 @@ Graph Gradient(Graph src) {
   std::vector<NodePtr> topo_order;
   std::unordered_map<Node*, std::vector<GradEntry> > output_grads;
 
+  // Fill output_grads in topological order with every node starting at the outputs
   DFSVisit(ys, [&](const NodePtr& node) {
-      if (output_grads.count(node.get()) == 0) {
+      if (output_grads.find(node.get()) == output_grads.end())
         output_grads[node.get()].resize(node->num_outputs());
-      }
-      topo_order.push_back(node);
+      topo_order.emplace_back(node);
     });
 
+  // Fill gradient heads
   CHECK_EQ(ys.size(), ys_out_grad.size());
   for (size_t i = 0; i < ys.size(); ++i) {
     NodeEntry ograd = ys_out_grad[i];
-    output_grads[ys[i].node.get()][ys[i].index].grads = { ograd };
+    output_grads[ys[i].node.get()].at(ys[i].index).grads = { ograd };
   }
 
   // Check that all xs are reachable from ys
@@ -144,7 +145,7 @@ Graph Gradient(Graph src) {
         << "because it is unreachable from the outputs.";
   }
 
-  // construct mirror reduece memory strategy if needed
+  // construct mirror to reduce memory strategy if needed
   std::unordered_map<Node*, NodePtr> mirror_map;
   if (mirror_fun != nullptr) {
     for (const NodePtr& n : topo_order) {
