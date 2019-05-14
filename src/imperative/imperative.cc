@@ -20,6 +20,7 @@
 #include <iostream>
 #include "./imperative_utils.h"
 #include "./cached_op.h"
+#include "../nnvm/graph_dump.h"
 
 namespace mxnet {
 #if DMLC_CXX11_THREAD_LOCAL
@@ -305,7 +306,9 @@ std::vector<NDArray*> Imperative::Backward(
   std::vector<NodeEntry> ograd_entries;
   ograd_entries.reserve(ograds.size());
   for (size_t i = 0; i < outputs.size(); ++i) {
-    ograd_entries.emplace_back(NodeEntry{Node::Create(), 0, 0});
+    std::ostringstream os;
+    os << "head grad #" << i;
+    ograd_entries.emplace_back(NodeEntry{Node::Create(nullptr, os.str()), 0, 0});
     AGInfo& info = AGInfo::Create(ograd_entries.back().node);
     info.ctx = outputs[i]->ctx();
     if (ograds[i] != nullptr) {
@@ -355,6 +358,11 @@ std::vector<NDArray*> Imperative::Backward(
         << "There are no inputs in computation graph that require gradients.";
   }
 
+  if (backward_graph_dump_enabled_) {
+    std::cout << "Forward graph: " << std::endl;
+    std::cout << GraphDump(graph.outputs) << std::endl;
+  }
+
   Graph g_graph = pass::MXGradient(
       graph, graph.outputs, xs, ograd_entries,
       exec::AggregateGradient, nullptr, nullptr,
@@ -370,6 +378,12 @@ std::vector<NDArray*> Imperative::Backward(
       graph.outputs.push_back(e);
     }
   }
+
+  if (backward_graph_dump_enabled_) {
+    std::cout << "Backward graph: " << std::endl;
+    std::cout << GraphDump(g_graph.outputs) << std::endl;
+  }
+
   const auto& idx = graph.indexed_graph();
   // get number of nodes used in forward pass
   size_t num_forward_nodes = 0;
