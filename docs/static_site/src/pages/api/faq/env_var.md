@@ -321,12 +321,17 @@ If ctypes is used, it must be `mxnet._ctypes.ndarray.NDArrayBase`.
   - Set ```MXNET_SUBGRAPH_BACKEND=NONE``` to disable subgraph backend.
 
 * MXNET_SAFE_ACCUMULATION
-  - Values: Values: 0(false) or 1(true) ```(default=0)```
+  - Values: 0(false) or 1(true) ```(default=0)```
   - If this variable is set, the accumulation will enter the safe mode, meaning accumulation is done in a data type of higher precision than
     the input data type, leading to more accurate accumulation results with a possible performance loss and backward compatibility loss.
     For example, when the variable is set to 1(true), if the input data type is float16, then the accumulation will be done
     with float32.
   - Model accuracies do not necessarily improve with this environment variable turned on.
+
+* MXNET_BACKWARD_GRAPH_DUMP
+  - Values: {true,false,1,0}
+  - If enabled, the forward and backward graph will be dumpped to stdout when running backward or
+    autograd.grad
 
 Settings for Minimum Memory Usage
 ---------------------------------
