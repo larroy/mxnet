@@ -628,8 +628,9 @@ nnvm::Graph InferShapeAttr(nnvm::Graph &&ret,
     }
     if (dispatch_mode_name) {
       for (size_t i = node_start; i < node_end; i++) {
-        if (dispatch_modes[i] == DispatchMode::kUndefined)
+        if (dispatch_modes[i] == DispatchMode::kUndefined) {
           ++num_unknown;
+        }
       }
     }
     ++i;
