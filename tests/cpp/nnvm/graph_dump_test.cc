@@ -24,10 +24,9 @@ using namespace nnvm;
 using namespace std;
 
 /*
- * Test that enum and string values are in sync
  */
 TEST(Graph_dump, basic) {
     Graph g;
-    //g.outputs.emplace_back(Node::Create(), 0, 0);
+    g.outputs.emplace_back(Node::Create(), 0, 0);
 
 }

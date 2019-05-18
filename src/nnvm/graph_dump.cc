@@ -27,9 +27,15 @@
 #include "./graph_dump.h"
 
 namespace nnvm {
+using namespace std;
 
 std::string DumpGraph(const Graph& graph) {
-    return "";
+    string res = "Graph dump\n=========\n";
+    res += "Attributes:";
+    for (const auto& attrs : graph.attrs) {
+      res += attrs.first + ": " + attrs.second;
+    }
+
 }
 
 }  // end namespace nnvm
