@@ -354,8 +354,13 @@ Imperative::GradientVariableNodes Imperative::CreateGradientVariableNodes(
         info.fresh_out_grad = true;
       }
     }
+/*    
     CHECK_GT(var_nodes.variable_nodes.size(), 0)
         << "There are no inputs in computation graph that require gradients.";
+*/
+    if (var_nodes.variable_nodes.empty()) {
+      LOG(WARNING) << "There are no inputs in computation graph that require gradients.";
+    }
   }
   return var_nodes;
 }
