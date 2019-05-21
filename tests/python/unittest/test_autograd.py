@@ -448,18 +448,24 @@ def test_gradient():
 
 
 def test_ag_grad():
-    x = mx.nd.ones((3,3))
-    y = mx.nd.ones((3,3))
+    x = mx.nd.array([[2,2,2],[2,2,2],[2,2,4]])
+    y = mx.nd.array([[2,2,2], [3,3,3], [4,4,4]])
     x.attach_grad()
     y.attach_grad()
     with mx.autograd.record():
-        #z = x + y
-        z = x + y
-        x_grad_y_grad = mx.autograd.grad(z, x, create_graph=True, retain_graph=True)
+        z = nd.elemwise_add(nd.elemwise_mul(x,x),y)
+        x_grad_y_grad = mx.autograd.grad(z, x, create_graph=True, retain_graph=True)[0]
+        print("dz/dx |x: ")
         print(x_grad_y_grad)
-        first_grad = nd.concat(*[x.reshape(-1) for x in x_grad_y_grad], dim=0)
-        fg_f = 2 * first_grad
-        second_grad = mx.autograd.grad(fg_f, [x,y], retain_graph=True)
+        fg_f = 3 * x_grad_y_grad
+        second_grad = mx.autograd.grad(fg_f, x, create_graph=False, retain_graph=True)[0]
+        print("second grad: ")
+        print(second_grad)
+        print("x.grad: ")
+        print(x.grad)
+    #fg_f.backward()
+    print("x.grad: ")
+    print(x.grad)
 
 
 if __name__ == "__main__":
