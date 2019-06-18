@@ -18,8 +18,10 @@
 
 import math
 from mxnet import nd, autograd
-from mxnet.test_utils import assert_almost_equal, random_arrays, rand_shape_nd
+from mxnet.test_utils import assert_almost_equal, random_arrays, rand_shape_nd, same
 from common import with_seed
+from mxnet import gluon
+import mxnet
 
 
 @with_seed()
@@ -174,7 +176,7 @@ def check_second_order_unary(x, op, grad_grad_op):
     assert_almost_equal(expected_grad_grad, x.grad.asnumpy())
 
 class RandomShapes:
-    def __init__(dim):
+    def __init__(self, dim):
         self.dim = dim
         self.curdim = 1
 
@@ -185,22 +187,22 @@ class RandomShapes:
         if self.curdim > self.dim:
             raise StopIteration
         shape = rand_shape_nd(self.curdim)
-        x = random_arrays(shape)
-        return x
+        print(shape)
+        x = nd.random.normal(shape=shape)
         self.curdim += 1
+        return x
 
 
 @with_seed()
 def test_dense_backward():
     import mxnet.autograd as ag
     import mxnet.ndarray as nd
-    array = random_arrays(shape)
-    net = gluon.nn.Sequential()
-    with net.name_scope():
-        net.add(gluon.nn.Dense(1, in_units=x.shape[1]))
-    net.initialize(mx.initializer.Constant(.5))
-    params = [p.data() for p in net.collect_params().values()]
     for x in RandomShapes(5):
+        net = gluon.nn.Sequential()
+        with net.name_scope():
+            #net.add(gluon.nn.Dense(1, in_units=x.shape[1]))
+            net.add(gluon.nn.Dense(1))
+        net.initialize(mxnet.initializer.Constant(.5))
         x.attach_grad()
         with ag.record():
             y = net.forward(x)
