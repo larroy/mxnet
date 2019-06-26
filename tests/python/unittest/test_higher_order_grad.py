@@ -20,6 +20,8 @@ import math
 from mxnet import nd, autograd
 from mxnet.test_utils import assert_almost_equal, random_arrays, rand_shape_nd, same
 from common import with_seed
+import mxnet.autograd as ag
+import mxnet.ndarray as nd
 from mxnet import gluon
 import mxnet
 
@@ -190,7 +192,6 @@ class RandomShapes(object):
         if self.curdim > self.dim:
             raise StopIteration
         shape = rand_shape_nd(self.curdim)
-        print(shape)
         x = nd.random.normal(shape=shape)
         self.curdim += 1
         return x
@@ -198,12 +199,9 @@ class RandomShapes(object):
 
 @with_seed()
 def test_dense_backward():
-    import mxnet.autograd as ag
-    import mxnet.ndarray as nd
     for x in RandomShapes(5):
         net = gluon.nn.Sequential()
         with net.name_scope():
-            #net.add(gluon.nn.Dense(1, in_units=x.shape[1]))
             net.add(gluon.nn.Dense(1))
         net.initialize(mxnet.initializer.Constant(.5))
         x.attach_grad()
@@ -211,6 +209,13 @@ def test_dense_backward():
             y = net.forward(x)
             x_grad = ag.grad(y, x, create_graph=True, retain_graph=True)[0]
         x_grad.backward()
+        same(x.grad, nd.zeros(4))
+        with ag.record():
+            y = net.forward(x)
+            x_grad = ag.grad(y, x, create_graph=True, retain_graph=True)[0]
+            random_multiplier = nd.random.uniform_like(x_grad)
+            z = (random_multiplier * x_grad).sum()
+        z.backward()
         same(x.grad, nd.zeros(4))
 
 
