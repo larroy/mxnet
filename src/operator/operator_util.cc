@@ -497,7 +497,7 @@ void SimpleOpRegEntryImpl::RegisterSourceImperative() {
     SourceFunction fun = fsource_[dev_mask];
     OpReqType req = kWriteTo;
 
-    Engine::Get()->PushSync([ret, fun, dev_mask, req, env](RunContext ctx) {
+    Engine::Get()->PushSync([ret, fun, req, env](RunContext ctx) {
         TBlob tmp = ret.data();
         (*fun)(env, &tmp, req, ctx);
 #if MXNET_USE_CUDA
@@ -681,7 +681,7 @@ void SimpleOpRegEntryImpl::RegisterUnaryImperative() {
           << "inplace operation is not enabled for operator " << name;
     }
 
-    Engine::Get()->PushSync([src, ret, fun, dev_mask, req, env](RunContext ctx) {
+    Engine::Get()->PushSync([src, ret, fun, req, env](RunContext ctx) {
         TBlob tmp = ret.data();
         (*fun)(src.data(), env, &tmp, req, ctx);
 #if MXNET_USE_CUDA
@@ -955,7 +955,7 @@ void SimpleOpRegEntryImpl::RegisterBinaryImperative() {
         << " warning, perform inplace operation with right operand, may not be supported";
     }
 
-    Engine::Get()->PushSync([lhs, rhs, ret, fun, dev_mask, req, env](RunContext ctx) {
+    Engine::Get()->PushSync([lhs, rhs, ret, fun, req, env](RunContext ctx) {
         TBlob tmp = ret.data();
         (*fun)(lhs.data(), rhs.data(), env, &tmp, req, ctx);
         #if MXNET_USE_CUDA
