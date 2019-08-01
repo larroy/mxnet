@@ -1,4 +1,4 @@
-/*
+  /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -42,8 +42,19 @@ static void SegfaultLogger(int sig) {
 
 class LibraryInitializer {
  public:
+  static LibraryInitializer* Get();
   LibraryInitializer() {
     dmlc::InitLogging("mxnet");
+    install_sigsev_handler();
+    set_opencv_concurrency();
+  }
+
+
+ private:
+  /**
+   * Install segmentation fault handler to print backtraces if enabled at compile time.
+   */
+  void install_sigsev_handler() {
 #if MXNET_USE_SIGNAL_HANDLER && DMLC_LOG_STACK_TRACE
     struct sigaction sa;
     sigaction(SIGSEGV, nullptr, &sa);
@@ -51,36 +62,18 @@ class LibraryInitializer {
         signal(SIGSEGV, SegfaultLogger);
     }
 #endif
-
-// disable openmp for multithreaded workers
-#ifndef _WIN32
-    using op::custom::CustomOperator;
-    pthread_atfork(
-      []() {
-        CustomOperator::Get()->Stop();
-        Engine::Get()->Stop();
-      },
-      []() {
-        Engine::Get()->Start();
-        CustomOperator::Get()->Start();
-      },
-      []() {
-        // Conservative thread management for multiprocess workers
-        const size_t mp_worker_threads = dmlc::GetEnv("MXNET_MP_WORKER_NTHREADS", 1);
-        dmlc::SetEnv("MXNET_CPU_WORKER_NTHREADS", mp_worker_threads);
-        dmlc::SetEnv("OMP_NUM_THREADS", 1);
-#if MXNET_USE_OPENCV && !__APPLE__
-        const size_t mp_cv_num_threads = dmlc::GetEnv("MXNET_MP_OPENCV_NUM_THREADS", 0);
-        cv::setNumThreads(mp_cv_num_threads);  // disable opencv threading
-#endif  // MXNET_USE_OPENCV
-        engine::OpenMP::Get()->set_enabled(false);
-        Engine::Get()->Start();
-        CustomOperator::Get()->Start();
-      });
-#endif
   }
 
-  static LibraryInitializer* Get();
+  /**
+   * Sets the number of threads for opencv given the environment
+   */
+  void set_opencv_concurrency() {
+#if MXNET_USE_OPENCV && !__APPLE__
+    const size_t mp_cv_num_threads = dmlc::GetEnv("MXNET_MP_OPENCV_NUM_THREADS", 0);
+    cv::setNumThreads(mp_cv_num_threads);  // disable opencv threading
+#endif  // MXNET_USE_OPENCV
+  }
+
 };
 
 LibraryInitializer* LibraryInitializer::Get() {
