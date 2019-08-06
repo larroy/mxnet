@@ -67,8 +67,7 @@ LibraryInitializer::LibraryInitializer()
   : original_pid_(common::current_process_id()),
     mp_worker_nthreads_(dmlc::GetEnv("MXNET_MP_WORKER_NTHREADS", 1)),
     cpu_worker_nthreads_(dmlc::GetEnv("MXNET_CPU_WORKER_NTHREADS", 1)),
-    mp_cv_num_threads_(dmlc::GetEnv("MXNET_MP_OPENCV_NUM_THREADS", 0))
-{
+    mp_cv_num_threads_(dmlc::GetEnv("MXNET_MP_OPENCV_NUM_THREADS", 0)) {
   dmlc::InitLogging("mxnet");
   engine::OpenMP::Get();   // force OpenMP initialization
   install_signal_handlers();
