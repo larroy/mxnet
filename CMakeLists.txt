@@ -16,6 +16,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/build/private/local_config.cmake)
   include(${CMAKE_CURRENT_SOURCE_DIR}/build/private/local_config.cmake)
 endif()
 
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Utils.cmake)
 
 #Some things have order. This must be put in front alone
@@ -23,8 +24,7 @@ mxnet_option(USE_CUDA             "Build with CUDA support"   ON)
 mxnet_option(USE_OLDCMAKECUDA     "Build with old cmake cuda" OFF)
 mxnet_option(USE_NCCL             "Use NVidia NCCL with CUDA" OFF)
 mxnet_option(USE_OPENCV           "Build with OpenCV support" ON)
-mxnet_option(USE_OPENMP           "Build with Openmp support" ON)
-mxnet_option(USE_OPENMP_BUNDLED_LLVM "Build with bundled llvm openmp from 3rdparty" OFF)
+mxnet_option(USE_OPENMP           "Build with Openmp support" ON) # OPENMP_PLATFORM chooses OPENMP implementations
 mxnet_option(USE_CUDNN            "Build with cudnn support"  ON) # one could set CUDNN_ROOT for search path
 mxnet_option(USE_SSE              "Build with x86 SSE instruction support" ON IF NOT ARM)
 mxnet_option(USE_F16C             "Build with x86 F16C instruction support" ON) # autodetects support if ON
@@ -53,6 +53,8 @@ mxnet_option(USE_ASAN             "Enable Clang/GCC ASAN sanitizers." OFF)
 mxnet_option(ENABLE_TESTCOVERAGE  "Enable compilation with test coverage metric output" OFF)
 mxnet_option(USE_INT64_TENSOR_SIZE "Use int64_t to represent the total number of elements in a tensor" OFF)
 mxnet_option(BUILD_CYTHON_MODULES "Build cython modules." OFF)
+
+
 
 message(STATUS "CMAKE_CROSSCOMPILING ${CMAKE_CROSSCOMPILING}")
 message(STATUS "CMAKE_HOST_SYSTEM_PROCESSOR ${CMAKE_HOST_SYSTEM_PROCESSOR}")
@@ -431,10 +433,14 @@ endif()
 
 # ---[ OpenMP
 if(USE_OPENMP)
+  if (NOT OPENMP_FLAVOR)
+      set(OPENMP_FLAVOR "platform")
+  endif()
+  message(STATUS "OPENMP_FLAVOR=${OPENMP_FLAVOR}")
   find_package(OpenMP REQUIRED)
   # This should build on Windows, but there's some problem and I don't have a Windows box, so
   # could a Windows user please fix?
-  if(USE_OPENMP_BUNDLED_LLVM AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/openmp/CMakeLists.txt
+  if(OPENMP_FLAVOR STREQUAL "bundled_llvm" AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/openmp/CMakeLists.txt
       AND SYSTEM_ARCHITECTURE STREQUAL "x86_64"
       AND NOT MSVC
       AND NOT CMAKE_CROSSCOMPILING)
@@ -451,7 +457,7 @@ if(USE_OPENMP)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     add_definitions(-DMXNET_USE_OPENMP=1)
-  else()
+  elseif(OPENMP_FLAVOR STREQUAL "platform")
     message("Using platform provided OpenMP")
     if(OPENMP_FOUND)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -460,6 +466,8 @@ if(USE_OPENMP)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
       add_definitions(-DMXNET_USE_OPENMP=1)
     endif()
+  else()
+    message(FATAL_ERROR "OPENMP_FLAVOR takes values [platform, bundled_llvm]")
   endif()
 elseif(UNIX AND NOT ANDROID)
   list(APPEND mxnet_LINKER_LIBS pthread)
