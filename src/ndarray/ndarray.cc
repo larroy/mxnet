@@ -1724,7 +1724,7 @@ bool NDArray::LegacyLoad(dmlc::Stream *strm, const uint32_t magic) {
 }
 
 bool NDArray::Load(dmlc::Stream *strm) {
-  uint32_t magic;
+  uint32_t magic = 0;
   if (strm->Read(&magic, sizeof(uint32_t)) != sizeof(uint32_t)) return false;
   if (magic == NDARRAY_V3_MAGIC) {
     CHECK(Imperative::Get()->is_np_shape())
@@ -1742,7 +1742,7 @@ bool NDArray::Load(dmlc::Stream *strm) {
   }
 
   // load storage type
-  int32_t stype;
+  int32_t stype{};
   if (strm->Read(&stype, sizeof(stype)) != sizeof(stype)) return false;
   if (Imperative::Get()->is_np_shape()) {
     CHECK_EQ(stype, kDefaultStorage)
@@ -1841,7 +1841,8 @@ void NDArray::Save(dmlc::Stream* fo,
 void NDArray::Load(dmlc::Stream* fi,
                    std::vector<NDArray>* data,
                    std::vector<std::string>* keys) {
-  uint64_t header, reserved;
+  uint64_t header{};
+  uint64_t reserved{};
   CHECK(fi->Read(&header))
       << "Invalid NDArray file format";
   CHECK(fi->Read(&reserved))

@@ -21,7 +21,7 @@ from distutils.version import LooseVersion
 from itertools import permutations, combinations_with_replacement
 import os
 import pickle as pkl
-from nose.tools import assert_raises, raises
+from nose.tools import assert_raises, raises, eq_
 from common import with_seed, assertRaises, TemporaryDirectory
 from mxnet.test_utils import almost_equal
 from mxnet.test_utils import assert_almost_equal, assert_exception
@@ -32,6 +32,7 @@ from mxnet.test_utils import random_sample, rand_shape_nd
 from mxnet import runtime
 from numpy.testing import assert_allclose
 import mxnet.autograd
+import tempfile
 
 
 def check_with_uniform(uf, arg_shapes, dim=None, npuf=None, rmin=-10, type_list=[np.float32]):
@@ -400,6 +401,17 @@ def test_ndarray_saveload():
         single_ndarray_loaded = single_ndarray_loaded[0]
         assert np.sum(single_ndarray.asnumpy() != single_ndarray_loaded.asnumpy()) == 0
     os.remove(fname)
+
+def test_ndarray_singular():
+#    x = mx.nd.array(1)
+#    with tempfile.NamedTemporaryFile() as file:
+#        mx.nd.save(file.name, x)
+#        rx = mx.nd.load(file.name)
+    xs = {"1": mx.nd.array(1), "2": mx.nd.array(2)}
+    with tempfile.NamedTemporaryFile() as file:
+        mx.nd.save(file.name, xs)
+        rxs = mx.nd.load(file.name)
+        eq_(xs, rxs)
 
 
 @with_seed()
