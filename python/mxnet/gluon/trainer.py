@@ -23,6 +23,8 @@ __all__ = ['Trainer']
 from .. import optimizer as opt
 from ..model import _create_kvstore, _create_sparse_kvstore
 from .parameter import ParameterDict, Parameter
+import time
+import logging
 
 class Trainer(object):
     """Applies an `Optimizer` on a set of Parameters. Trainer should
@@ -327,8 +329,10 @@ class Trainer(object):
             self._init_kvstore()
         if self._params_to_init:
             self._init_params()
-
+        t0 = time.time()
         self._allreduce_grads()
+        td = time.time() - t0
+        logging.info("All reduce took: %s s", td)
         self._update(ignore_stale_grad)
 
     def allreduce_grads(self):
