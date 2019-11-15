@@ -38,7 +38,7 @@ from ..util import is_np_array
 
 __all__ = [
     'AdaDelta', 'AdaGrad', 'Adam', 'Adamax', 'DCASGD', 'FTML', 'Ftrl', 'LBSGD',
-    'NAG', 'NDabs', 'Nadam', 'Optimizer', 'RMSProp', 'SGD', 'SGLD', 'Signum', 'LAMB',
+    'NAG', 'NDabs', 'Nadam', 'Optimizer', 'RMSProp', 'SGD', 'SGLD', 'Signum', 'LAMB3',
     'Test', 'Updater', 'ccSGD', 'create', 'get_updater', 'register'
 ]
 
@@ -975,12 +975,12 @@ class LBSGD(Optimizer):
 
 
 @register
-class LAMB(Optimizer):
+class LAMB3(Optimizer):
     """LAMB Optimizer.
     """
     def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-6,
                  lower_bound=None, upper_bound=None, bias_correction=False, **kwargs):
-        super(LAMB, self).__init__(learning_rate=learning_rate, **kwargs)
+        super(LAMB3, self).__init__(learning_rate=learning_rate, **kwargs)
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
