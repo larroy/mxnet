@@ -6,6 +6,8 @@ steps:
 - name: build
   image: ubuntu 
   commands:
+  - apt install -y python3
+  - pip3 install pyyaml
   - ./dev_menu.py 13
   - echo done
 
