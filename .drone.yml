@@ -7,7 +7,7 @@ steps:
   image: mxnetci/build.ubuntu_cpu_python
   commands:
   - pip3 install pyyaml
-  - ./dev_menu.py 13
+  - ./dev_menu.py menu 13
   - echo done
 
 trigger:
