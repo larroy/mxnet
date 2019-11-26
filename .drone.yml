@@ -4,10 +4,8 @@ name: default
 
 steps:
 - name: build
-  image: ubuntu 
+  image: mxnetci/build.ubuntu_cpu_python
   commands:
-  - apt install -y python3
-  - pip3 install pyyaml
   - ./dev_menu.py 13
   - echo done
 
