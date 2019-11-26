@@ -1,0 +1,13 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: build
+  image: ubuntu 
+  commands:
+  - ./dev_menu.py 13
+
+trigger:
+  branch:
+  - master
