@@ -6,9 +6,8 @@ steps:
 - name: build
   image: mxnetci/build.ubuntu_cpu_python
   commands:
-  - pip3 install pyyaml docker
-  - ./dev_menu.py menu 13
-  - echo done
+      - /work/runtime_functions.sh build_ubuntu_cpu_openblas
+      - /work/runtime_functions.sh unittest_ubuntu_python3_cpu
 
 trigger:
   branch:
