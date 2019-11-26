@@ -6,6 +6,7 @@ steps:
 - name: build
   image: mxnetci/build.ubuntu_cpu_python
   commands:
+      - git submodule update --recursive --init
       - /work/runtime_functions.sh build_ubuntu_cpu_openblas
       - /work/runtime_functions.sh unittest_ubuntu_python3_cpu
 
