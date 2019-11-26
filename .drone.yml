@@ -6,7 +6,7 @@ steps:
 - name: build
   image: mxnetci/build.ubuntu_cpu_python
   commands:
-  - pip3 install pyyaml
+  - pip3 install pyyaml docker
   - ./dev_menu.py menu 13
   - echo done
 
