@@ -319,7 +319,6 @@ def main() -> int:
 
     parser.add_argument("-d", "--docker-registry",
                         help="Dockerhub registry name to retrieve cache from.",
-                        default='mxnetci',
                         type=str)
 
     parser.add_argument("-r", "--docker-build-retries",
