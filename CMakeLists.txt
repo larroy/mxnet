@@ -23,7 +23,7 @@ mxnet_option(USE_CUDA             "Build with CUDA support"   ON)
 mxnet_option(USE_OLDCMAKECUDA     "Build with old cmake cuda" OFF)
 mxnet_option(USE_NCCL             "Use NVidia NCCL with CUDA" OFF)
 mxnet_option(USE_OPENCV           "Build with OpenCV support" ON)
-mxnet_option(USE_OPENMP           "Build with Openmp support" ON) # OFF | ON | PLATFORM | BUNDLED
+mxnet_option(USE_OPENMP           "Build with Openmp support" PLATFORM) # OFF | ON | PLATFORM | BUNDLED
 mxnet_option(USE_CUDNN            "Build with cudnn support"  ON) # one could set CUDNN_ROOT for search path
 mxnet_option(USE_SSE              "Build with x86 SSE instruction support" ON IF NOT ARM)
 mxnet_option(USE_F16C             "Build with x86 F16C instruction support" ON) # autodetects support if ON
