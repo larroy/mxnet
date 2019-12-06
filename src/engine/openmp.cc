@@ -85,12 +85,13 @@ void OpenMP::set_reserve_cores(int cores) {
 #endif
 }
 
+using namespace std;
+
 int OpenMP::GetRecommendedOMPThreadCount(bool exclude_reserved) const {
   cout << "GetRecommendedOMPThreadCount: ";
 #ifdef _OPENMP
   if (omp_num_threads_set_in_environment_) {
-    cout << " from env ";
-    cout << omp_get_max_threads() << endl;
+    cout << "GetRecommendedOMPThreadCount from environment: " << omp_get_max_threads() << endl;
     return omp_get_max_threads();
   }
   if (enabled_) {
