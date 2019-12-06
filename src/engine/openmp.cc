@@ -22,6 +22,8 @@
 #include <climits>
 #include "./openmp.h"
 
+using namespace std;
+
 namespace mxnet {
 namespace engine {
 
@@ -40,6 +42,8 @@ OpenMP *OpenMP::Get() {
 
 OpenMP::OpenMP()
   : omp_num_threads_set_in_environment_(is_env_set("OMP_NUM_THREADS")) {
+  cout << "OpenMP()" << endl;
+  cout << dmlc::GetEnv("OMP_NUM_THREADS", -1) << endl;
 #ifdef _OPENMP
   const int max = dmlc::GetEnv("MXNET_OMP_MAX_THREADS", INT_MIN);
   if (max != INT_MIN) {
@@ -82,11 +86,15 @@ void OpenMP::set_reserve_cores(int cores) {
 }
 
 int OpenMP::GetRecommendedOMPThreadCount(bool exclude_reserved) const {
+  cout << "GetRecommendedOMPThreadCount: ";
 #ifdef _OPENMP
   if (omp_num_threads_set_in_environment_) {
+    cout << " from env ";
+    cout << omp_get_max_threads() << endl;
     return omp_get_max_threads();
   }
   if (enabled_) {
+    cout << " not set from env " << endl;
     int thread_count = omp_get_max_threads();
     if (exclude_reserved) {
       if (reserve_cores_ >= thread_count) {
@@ -97,8 +105,11 @@ int OpenMP::GetRecommendedOMPThreadCount(bool exclude_reserved) const {
     }
     // Check that OMP doesn't suggest more than our 'omp_thread_max_' value
     if (!omp_thread_max_ || thread_count < omp_thread_max_) {
+      //cout << thread_count << endl;
+      cout << thread_count;
       return thread_count;
     }
+    cout << omp_thread_max_;
     return omp_thread_max_;
   }
   return 1;
