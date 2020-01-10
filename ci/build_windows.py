@@ -34,6 +34,7 @@ import zipfile
 from distutils.dir_util import copy_tree
 from enum import Enum
 from subprocess import check_call
+import re
 
 from util import *
 
@@ -136,6 +137,20 @@ CMAKE_FLAGS = {
 
 }
 
+def load_vcvars(vcvars_bat):
+    vcvarsf = tempfile.mktemp()
+    check_call(r'call "{}" && set > {}'.format(vcvars_bat, vcvarsf), shell=True)
+    with open(vcvarsf, 'r') as f:
+        for line in f:
+            line = line.strip()
+            m = re.match(r'([^=]+)=(.*)', line)
+            if m:
+                k = m.group(1).upper()
+                if k == 'PATH':
+                    v = m.group(2)
+                    print(f"loading {k}={v}")
+                    os.environ[k] = v
+
 
 def windows_build(args):
     logging.info("Using vcvars environment:\n{}".format(args.vcvars))
@@ -148,9 +163,14 @@ def windows_build(args):
 
     with remember_cwd():
         os.chdir(path)
-        cmd = "\"{}\" && cmake -G Ninja {} {}".format(args.vcvars,
-                                                                        CMAKE_FLAGS[args.flavour],
-                                                                        mxnet_root)
+        #load_vcvars(args.vcvars)
+        os.environ['PATH'] = r'C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\x86_amd64;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools;C:\Windows\Microsoft.NET\Framework\v4.0.30319;C:\Program Files (x86)\HTML Help Workshop;C:\Program Files (x86)\Windows Kits\10\bin\x86;C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\;C:\Python37\Scripts\;C:\Python37\;C:\Python27\;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Amazon\cfn-bootstrap\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Python37\Scripts\;C:\Python37\;C:\Python27\;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Amazon\cfn-bootstrap\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;c:\Program Files\CMake\bin;c:\Program Files\CMake\bin'
+        cmd = "cmake -G Ninja {} {}".format(
+            CMAKE_FLAGS[args.flavour],
+            mxnet_root)
+#        cmd = "\"{}\" && cmake -G Ninja {} {}".format(args.vcvars,
+#            CMAKE_FLAGS[args.flavour],
+#            mxnet_root)
         logging.info("Generating project with CMake:\n{}".format(cmd))
         check_call(cmd, shell=True)
 
